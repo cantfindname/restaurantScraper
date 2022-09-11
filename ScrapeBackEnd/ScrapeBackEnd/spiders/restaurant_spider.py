@@ -1,31 +1,65 @@
+from datetime import datetime
 import scrapy
 import unidecode
 
-class ResturantSpider(scrapy.Spider):
-    name = "restaurant"
-    start_urls = [
+
+
+class RestaurantSpider(scrapy.Spider):
+    all_pages= [
         'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
     ]
 
-    def parse(self, response):
-        # for resturantPage in response.css(''):
+    name = "restaurant"
+    base_url= 'https://www.tripadvisor.com'
+    count = 0
 
-        # find the first href link in every div with data-test attribute
-        restaurant_list = response.xpath('/html//div[@data-test-target = "restaurants-list"]//div[@data-test]/descendant::*[@href][1]/@href').extract()
+    def start_requests(self):
+
+        urls = [
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+        ]
+        RestaurantSpider.count = 0
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse_all_page)        
         
-        restaurant_list[0]
-        # for url in restaurant_list:
-            
-        # for restaurant in restaurant_list:
-
-        #     restaurant = restaurant_list.xpath('//div[@data-test]//a/@href').extract()
-        #     print(restaurant)
-        #print(restaurant_list[0])
-        # with open('tte.txt','w') as f:
-        #     f.write(unidecode.unidecode(restaurant_list[0]))
-        # for restaurant in restaurant_list.xpath('/html//div[@data-test = r"list_item"]').extract():
-        #     print("\n\n\n\n\n")
-        #     print(restaurant)
+    # for testing only    
+    def test(self, response):
+        print(response.xpath('/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract())
 
 
-     
+    def parse_all_page(self, response):
+
+        # parse all pages with restaurant lists 
+        next_page = response.xpath(
+            '/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract()
+        if next_page != []:
+            RestaurantSpider.all_pages.append(RestaurantSpider.base_url+str(next_page[0]))
+            yield scrapy.Request(url=str(RestaurantSpider.all_pages[-1]),callback=self.parse_all_page)
+        else:
+            # begin parsing all restuarant information
+            for page in RestaurantSpider.all_pages:
+                print(page)
+                yield scrapy.Request(url=page, callback=self.parse_page_list, dont_filter=True)
+        
+    # parse list items from all list pages
+    def parse_page_list(self, response):
+        restaurant_list = response.xpath(
+            '/html//div[@data-test-target = "restaurants-list"]//div[@data-test]/descendant::*[@href][1]/@href').extract()
+        
+        # Scrape info from all restaurant homepages
+        for restaurant in restaurant_list:
+            yield scrapy.Request(url=RestaurantSpider.base_url+restaurant, callback = self.parse_page)
+            RestaurantSpider.count +=1 
+
+        print('count:'+ str(RestaurantSpider.count))
+        
+    # input restaurant homepage and parse information
+    def parse_page(self, response):
+        restaurant_name = response.xpath(
+            '/html//h1[@data-test-target ="top-info-header"]/text()').extract()
+        restaurant_address = response.xpath(
+            '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').extract()
+        print(restaurant_name)
+        #print(restaurant_address)
+
+

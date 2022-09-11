@@ -6,8 +6,13 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+from datetime import datetime
 
+start_time = datetime.now()
 
 class ScrapebackendPipeline:
     def process_item(self, item, spider):
         return item
+
+end_time = datetime.now()
+print('Duration: {}'.format(end_time - start_time))
