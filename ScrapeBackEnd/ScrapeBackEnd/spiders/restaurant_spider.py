@@ -1,12 +1,14 @@
 from datetime import datetime
 import scrapy
+import logging
 import unidecode
-
-
 
 class RestaurantSpider(scrapy.Spider):
     all_pages= [
-        'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+        #'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+        'https://www.tripadvisor.com/Restaurants-g34512-Orange_Lake_Florida.html',
+        'https://www.tripadvisor.com/Restaurants-g34136-Citra_Florida.html'
+
     ]
 
     name = "restaurant"
@@ -16,7 +18,9 @@ class RestaurantSpider(scrapy.Spider):
     def start_requests(self):
 
         urls = [
-            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            #'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34512-Orange_Lake_Florida.html',
+            'https://www.tripadvisor.com/Restaurants-g34136-Citra_Florida.html'
         ]
         RestaurantSpider.count = 0
         for url in urls:
@@ -41,6 +45,8 @@ class RestaurantSpider(scrapy.Spider):
                 print(page)
                 yield scrapy.Request(url=page, callback=self.parse_page_list, dont_filter=True)
         
+
+
     # parse list items from all list pages
     def parse_page_list(self, response):
         restaurant_list = response.xpath(
@@ -60,6 +66,10 @@ class RestaurantSpider(scrapy.Spider):
         restaurant_address = response.xpath(
             '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').extract()
         print(restaurant_name)
-        #print(restaurant_address)
+        print(restaurant_address)
 
 
+    def __init__(self, *args, **kwargs):
+        logger = logging.getLogger('scrapy.extensions.throttle')
+        logger.setLevel(logging.WARNING)
+        super().__init__(*args, **kwargs)
