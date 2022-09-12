@@ -84,9 +84,10 @@ RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
-#}
+
+ITEM_PIPELINES = {
+   'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

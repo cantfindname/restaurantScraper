@@ -6,13 +6,38 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from datetime import datetime
+import mysql.connector
 
-start_time = datetime.now()
+class ScrapebackendPipeline(object):
 
-class ScrapebackendPipeline:
+    def __init__(self):
+        self.create_connection()
+        self.create_table()
+
+    def create_connection(self):
+        self.conn = mysql.connector.connect(
+            host = 'localhost',
+            user = 'root',
+            passwd = 'scrapy123=',
+            database = 'restaurant',
+            use_unicode = True
+        )
+        self.curr = self.conn.cursor()
+
+    def create_table(self):
+
+        self.curr.execute("""DROP TABLE IF EXISTS fl_tb""")
+        self.curr.execute("""CREATE TABLE fl_tb(
+            name text,
+            address text
+        )""")
+
     def process_item(self, item, spider):
+        self.curr.execute("""INSERT INTO fl_tb VALUES (%s,%s)""", (
+            item['name'][0],
+            item['address'][0]
+            ))
+        self.conn.commit()
         return item
+            
 
-end_time = datetime.now()
-print('Duration: {}'.format(end_time - start_time))

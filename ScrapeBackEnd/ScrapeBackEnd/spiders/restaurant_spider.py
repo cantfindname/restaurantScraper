@@ -1,13 +1,13 @@
-from datetime import datetime
 import scrapy
 import logging
 import unidecode
 
+from ..items import ScrapebackendItem
+
 class RestaurantSpider(scrapy.Spider):
     all_pages= [
-        #'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
-        'https://www.tripadvisor.com/Restaurants-g34512-Orange_Lake_Florida.html',
-        'https://www.tripadvisor.com/Restaurants-g34136-Citra_Florida.html'
+        'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
+        'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html'
 
     ]
 
@@ -18,18 +18,24 @@ class RestaurantSpider(scrapy.Spider):
     def start_requests(self):
 
         urls = [
-            #'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
-            'https://www.tripadvisor.com/Restaurants-g34512-Orange_Lake_Florida.html',
-            'https://www.tripadvisor.com/Restaurants-g34136-Citra_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
+            'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html'
         ]
         RestaurantSpider.count = 0
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse_all_page)        
+            yield scrapy.Request(url=url, callback=self.parse_all_page)
         
+# ----------------------------------------------------------------------------------------------------
     # for testing only    
     def test(self, response):
-        print(response.xpath('/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract())
+        # print(response.xpath('/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract())
+        print('reached test')
+        items = ScrapebackendItem()
+        items['name'] ='love you'
+        items['address'] = 'route zero'
+        yield items
 
+# -----------------------------------------------------------------------------------------------------
 
     def parse_all_page(self, response):
 
@@ -61,12 +67,20 @@ class RestaurantSpider(scrapy.Spider):
         
     # input restaurant homepage and parse information
     def parse_page(self, response):
+        items = ScrapebackendItem()
+
         restaurant_name = response.xpath(
             '/html//h1[@data-test-target ="top-info-header"]/text()').extract()
         restaurant_address = response.xpath(
             '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').extract()
-        print(restaurant_name)
-        print(restaurant_address)
+
+        #print(restaurant_name)
+        #print(restaurant_address)
+
+        if restaurant_name != [] and restaurant_address != []:
+            items['name'] = restaurant_name
+            items['address'] = restaurant_address
+            yield items
 
 
     def __init__(self, *args, **kwargs):
