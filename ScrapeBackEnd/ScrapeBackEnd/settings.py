@@ -22,13 +22,13 @@ NEWSPIDER_MODULE = 'ScrapeBackEnd.spiders'
 ROBOTSTXT_OBEY = True
 
 DOWNLOAD_DELAY = 0
-DOWNLOAD_TIMEOUT = 30
+DOWNLOAD_TIMEOUT = 15
 RANDOMIZE_DOWNLOAD_DELAY = True
 
-REACTOR_THREADPOOL_MAXSIZE = 128
-CONCURRENT_REQUESTS = 256
-CONCURRENT_REQUESTS_PER_DOMAIN = 256
-CONCURRENT_REQUESTS_PER_IP = 256
+REACTOR_THREADPOOL_MAXSIZE = 512
+CONCURRENT_REQUESTS = 512
+CONCURRENT_REQUESTS_PER_DOMAIN = 512
+CONCURRENT_REQUESTS_PER_IP = 512
 
 AUTOTHROTTLE_ENABLED = True
 AUTOTHROTTLE_START_DELAY = 1
@@ -40,7 +40,11 @@ RETRY_ENABLED = True
 RETRY_TIMES = 3
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 409, 410, 429]
 
+ITEM_PIPELINES = {
+   'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
+}
 
+LOG_LEVEL = 'INFO'
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -85,9 +89,6 @@ RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-ITEM_PIPELINES = {
-   'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
-}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -110,4 +111,3 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-LOG_LEVEL = 'INFO'

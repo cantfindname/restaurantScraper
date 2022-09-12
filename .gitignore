@@ -90,3 +90,5 @@ ENV/
 
 # self created
 todo.txt
+__pycache__
+*.pyc

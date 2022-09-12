@@ -6,8 +6,7 @@ from ..items import ScrapebackendItem
 
 class RestaurantSpider(scrapy.Spider):
     all_pages= [
-        'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
-        'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html'
+        'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
 
     ]
 
@@ -18,8 +17,7 @@ class RestaurantSpider(scrapy.Spider):
     def start_requests(self):
 
         urls = [
-            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
-            'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
         ]
         RestaurantSpider.count = 0
         for url in urls:
