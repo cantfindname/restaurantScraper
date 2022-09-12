@@ -5,19 +5,19 @@ import unidecode
 from ..items import ScrapebackendItem
 
 class RestaurantSpider(scrapy.Spider):
-    all_pages= [
-        'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
-
-    ]
-
     name = "restaurant"
+
+    current_page = None
     base_url= 'https://www.tripadvisor.com'
     count = 0
 
     def start_requests(self):
 
         urls = [
-            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
+            'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
+            'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
+
         ]
         RestaurantSpider.count = 0
         for url in urls:
@@ -37,17 +37,18 @@ class RestaurantSpider(scrapy.Spider):
 
     def parse_all_page(self, response):
 
+        if RestaurantSpider.current_page == None:
+            RestaurantSpider.current_page = response.request.url
+
+        yield scrapy.Request(url=RestaurantSpider.current_page, callback=self.parse_page_list, dont_filter=True)
+
         # parse all pages with restaurant lists 
         next_page = response.xpath(
             '/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract()
+
         if next_page != []:
-            RestaurantSpider.all_pages.append(RestaurantSpider.base_url+str(next_page[0]))
-            yield scrapy.Request(url=str(RestaurantSpider.all_pages[-1]),callback=self.parse_all_page)
-        else:
-            # begin parsing all restuarant information
-            for page in RestaurantSpider.all_pages:
-                print(page)
-                yield scrapy.Request(url=page, callback=self.parse_page_list, dont_filter=True)
+            RestaurantSpider.current_page = RestaurantSpider.base_url+str(next_page[0])
+            yield scrapy.Request(url=RestaurantSpider.current_page,callback=self.parse_all_page)
         
 
 
