@@ -29,13 +29,24 @@ class ScrapebackendPipeline(object):
         self.curr.execute("""DROP TABLE IF EXISTS fl_tb""")
         self.curr.execute("""CREATE TABLE fl_tb(
             name text,
-            address text
+            address text,
+            five_star int,
+            four_star int,
+            three_star int,
+            two_star int,
+            one_star int
         )""")
 
     def process_item(self, item, spider):
-        self.curr.execute("""INSERT INTO fl_tb VALUES (%s,%s)""", (
-            item['name'][0],
-            item['address'][0]
+        self.curr.execute("""INSERT INTO fl_tb VALUES (%s,%s,%s,%s,%s,%s,%s)""", (
+            item['name'],
+            item['address'],
+            item['five_star'],
+            item['four_star'],
+            item['three_star'],
+            item['two_star'],
+            item['one_star']
+            
             ))
         self.conn.commit()
         return item
