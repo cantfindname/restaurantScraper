@@ -3,16 +3,23 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from dataclasses import dataclass, field
+from typing import Optional
+from scrapy.item import Item, Field
 
+#import scrapy
 
-class ScrapebackendItem(scrapy.Item):
+@dataclass
+class ScrapebackendItem:
     # define the fields for your item here like:
-    name = scrapy.Field()
-    address = scrapy.Field()
-    five_star = scrapy.Field()
-    four_star = scrapy.Field()
-    three_star = scrapy.Field()
-    two_star = scrapy.Field()
-    one_star = scrapy.Field()
-    pass
+    name: str = field(default = 'none')
+    city: str = field(default='none')
+    address: Optional[str] = field(default = 'none')
+    zipcode: Optional[int] = field(default = -1)
+    zc_extension: Optional[int] = field(default = -1)
+    five_star: Optional[int] = field(default = 0)
+    four_star: Optional[int] = field(default = 0)
+    three_star: Optional[int] = field(default = 0)
+    two_star: Optional[int] = field(default = 0)
+    one_star: Optional[int] = field(default = 0)
+    # pass

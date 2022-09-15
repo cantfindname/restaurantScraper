@@ -5,6 +5,7 @@
 
 
 # useful for handling different item types with a single interface
+from types import CoroutineType
 from itemadapter import ItemAdapter
 import mysql.connector
 
@@ -30,6 +31,9 @@ class ScrapebackendPipeline(object):
         self.curr.execute("""CREATE TABLE fl_tb(
             name text,
             address text,
+            city text,
+            zipcode int,
+            zc_extension int,
             five_star int,
             four_star int,
             three_star int,
@@ -38,17 +42,29 @@ class ScrapebackendPipeline(object):
         )""")
 
     def process_item(self, item, spider):
-        self.curr.execute("""INSERT INTO fl_tb VALUES (%s,%s,%s,%s,%s,%s,%s)""", (
-            item['name'],
-            item['address'],
-            item['five_star'],
-            item['four_star'],
-            item['three_star'],
-            item['two_star'],
-            item['one_star']
-            
+        self.curr.execute("""INSERT INTO fl_tb VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+            # item['name'],
+            # item['address'],
+            # item['city'],
+            # item['zipcode'],
+            # item['zc_extension'],
+            # item['five_star'],
+            # item['four_star'],
+            # item['three_star'],
+            # item['two_star'],
+            # item['one_star']
+            item.name[0], 
+            item.address[0],
+            item.city[0],
+            item.zipcode[0],
+            item.zc_extension[0],
+            item.five_star[0],
+            item.four_star[0],
+            item.three_star[0],
+            item.two_star[0],
+            item.one_star[0],
+
             ))
         self.conn.commit()
         return item
             
-
