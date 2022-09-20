@@ -1,4 +1,4 @@
-from unittest import result
+from urllib.parse import urljoin
 import scrapy
 import logging
 from lxml.etree import XPathEvalError
@@ -6,7 +6,11 @@ import os
 import re
 from scrapy.loader import ItemLoader
 
+
+
 from ..items import ScrapebackendItem
+
+
 
 class RestaurantSpider(scrapy.Spider):
     name = "restaurant"
@@ -19,35 +23,59 @@ class RestaurantSpider(scrapy.Spider):
 
         urls = [
             # 'https://www.tripadvisor.com/Restaurant_Review-g34127-d491231-Reviews-Celebration_Town_Tavern-Celebration_Orlando_Florida.html'
-            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
-            'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
-            'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
+            # 'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
+            # 'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
+            # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'
 
         ]
         RestaurantSpider.count = 0
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse_all_page)
+            yield scrapy.Request(url=url, callback=self.get_state_pg)
         
 # ----------------------------------------------------------------------------------------------------
     # for testing only    
-    def test(self, response):
-        # print(response.xpath('/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract())
-        restaurant_address = response.xpath(
-            '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').get()
-        # current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
-        current_city = response.xpath('/html//ul[@data-test-target="breadcrumbs"]/li[last()-1]/a/span/text()').get()
-        current_city = current_city.replace(' Restaurants','')
 
-        result_list = re.search('^(.+),\s([A-Z][\w\s]*)\s*\,*\s*[A-Z]{2}\s*([0-9]{5})*-*([0-9]{4})*$',restaurant_address)
-        
-        print(restaurant_address)
-        print(current_city)
-        print(result_list)
+        def test(self, response):
+            print('\n')
+
         # filename = 'smthswrong.html'
         # with open(filename, 'wb') as f:
         #     f.write(response.body)
-        print('\n')
+
+
 # -----------------------------------------------------------------------------------------------------
+
+    def get_state_pg(self, response):
+        city_list = response.xpath('/html//div[@class="geos_grid"]//div[@class ="geo_name"]/a[@href]/@href').extract()
+        for city in city_list:
+            # city = city.replace('\n','')
+            # print(urljoin(RestaurantSpider.base_url, city))
+            yield scrapy.Request(url= urljoin(RestaurantSpider.base_url, city), callback=self.parse_all_page)
+
+        second_page = response.xpath(
+            '/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').get()
+        yield scrapy.Request(url=RestaurantSpider.base_url+second_page, callback=self.parse_state_page)
+
+
+    def parse_state_page(self, response):
+        total_city = response.xpath(
+            '/html//div[@class="pagination"]/span[@class="pgCount"]/text()[2]').get()
+        total_city = total_city.replace(' ','')
+
+        city_list_url = response.request.url
+        city_list_url = city_list_url.replace('oa20','oa0')
+
+        for i in range(20, int(total_city), 20):
+            city_list_url = city_list_url.replace(f'oa{i-20}', f'oa{i}')
+            # print(city_list_url)
+            yield scrapy.Request(url= city_list_url, callback=self.parse_city_list)
+
+    def parse_city_list(self, response):
+        city_list = response.xpath('/html//ul[@class="geoList"]/li/a/@href').extract()
+        for city in city_list:
+            yield scrapy.Request(url= urljoin(RestaurantSpider.base_url, city), callback=self.parse_all_page)
+            # print(urljoin(RestaurantSpider.base_url, city))
 
     def parse_all_page(self, response):
 
@@ -68,7 +96,7 @@ class RestaurantSpider(scrapy.Spider):
 
     # parse list items from all list pages
     def parse_page_list(self, response):
-
+        
         restaurant_list = response.xpath(
             '/html//div[@data-test-target = "restaurants-list"]//div[@data-test]/descendant::*[@href][1]/@href').extract()
         
@@ -81,7 +109,7 @@ class RestaurantSpider(scrapy.Spider):
         
     # input restaurant homepage and parse information
     def parse_page(self, response):
-
+        
         restaurant_name = response.xpath(
             '/html//h1[@data-test-target ="top-info-header"]/text()').get()
         restaurant_address = response.xpath(
@@ -91,7 +119,8 @@ class RestaurantSpider(scrapy.Spider):
         # current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
         # current_city = current_city.replace('_',' ')
 
-        current_city = response.xpath('/html//ul[@data-test-target="breadcrumbs"]/li[last()-1]/a/span/text()').get()
+        current_city = response.xpath(
+            '/html//ul[@data-test-target="breadcrumbs"]/li[last()-1]/a/span/text()').get()
         current_city = current_city.replace(' Restaurants','')
 
 
@@ -117,7 +146,9 @@ class RestaurantSpider(scrapy.Spider):
 
         
         if restaurant_address != None:
-            result_list = re.search(fr'^(.+),\s{current_city}\s*\,*\s*\w*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
+
+            result_list = re.search(
+                fr'^(.+),\s{current_city}\s*\,*\s*\w*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
             # if result_list.groups()[1] == None:
 
 
@@ -145,3 +176,4 @@ class RestaurantSpider(scrapy.Spider):
         logger = logging.getLogger('scrapy.extensions.throttle')
         logger.setLevel(logging.WARNING)
         super().__init__(*args, **kwargs)
+
