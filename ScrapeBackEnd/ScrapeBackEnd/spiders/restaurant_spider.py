@@ -1,3 +1,4 @@
+from unittest import result
 import scrapy
 import logging
 from lxml.etree import XPathEvalError
@@ -17,10 +18,10 @@ class RestaurantSpider(scrapy.Spider):
     def start_requests(self):
 
         urls = [
-            # 'https://www.tripadvisor.com/Restaurant_Review-g34242-d6637644-Reviews-Humble_Wood_Fire-Gainesville_Florida.html'
-            # 'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            # 'https://www.tripadvisor.com/Restaurant_Review-g34127-d491231-Reviews-Celebration_Town_Tavern-Celebration_Orlando_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
             'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
-            # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
 
         ]
         RestaurantSpider.count = 0
@@ -33,9 +34,13 @@ class RestaurantSpider(scrapy.Spider):
         # print(response.xpath('/html//span[@class = "pageNum current"]/following-sibling::a[1]/@href').extract())
         restaurant_address = response.xpath(
             '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').get()
-        current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
-        result_list = re.search(fr'^(.+),\s{current_city}\s*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
+        # current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
+        current_city = response.xpath('/html//ul[@data-test-target="breadcrumbs"]/li[last()-1]/a/span/text()').get()
+        current_city = current_city.replace(' Restaurants','')
+
+        result_list = re.search('^(.+),\s([A-Z][\w\s]*)\s*\,*\s*[A-Z]{2}\s*([0-9]{5})*-*([0-9]{4})*$',restaurant_address)
         
+        print(restaurant_address)
         print(current_city)
         print(result_list)
         # filename = 'smthswrong.html'
@@ -82,7 +87,13 @@ class RestaurantSpider(scrapy.Spider):
         restaurant_address = response.xpath(
             '/html//div[@data-test-target="restaurant-detail-info"]//a[@href ="#MAPVIEW"]/text()').get()
 
-        current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
+
+        # current_city = re.search('(\w+)_\w+.html$',response.request.url).groups()[0]
+        # current_city = current_city.replace('_',' ')
+
+        current_city = response.xpath('/html//ul[@data-test-target="breadcrumbs"]/li[last()-1]/a/span/text()').get()
+        current_city = current_city.replace(' Restaurants','')
+
 
         five_star_count = response.xpath(
             '/html//div[@data-value = "5"]//span[@class = "row_num  is-shown-at-tablet"]/text()').get()
@@ -105,9 +116,10 @@ class RestaurantSpider(scrapy.Spider):
         if one_star_count != None:one_star_count = one_star_count.replace(',','')
 
         
-
         if restaurant_address != None:
-            result_list = re.search(fr'^(.+),\s{current_city}\s*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
+            result_list = re.search(fr'^(.+),\s{current_city}\s*\,*\s*\w*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
+            # if result_list.groups()[1] == None:
+
 
         if restaurant_name != None and restaurant_address != None:
             l = ItemLoader(item=ScrapebackendItem(), response=response)
@@ -127,7 +139,6 @@ class RestaurantSpider(scrapy.Spider):
                 l.replace_value('zc_extension', result_list.groups()[2])
 
             return l.load_item()
-
 
 
     def __init__(self, *args, **kwargs):
