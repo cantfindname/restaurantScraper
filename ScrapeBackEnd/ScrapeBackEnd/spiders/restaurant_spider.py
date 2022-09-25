@@ -1,12 +1,13 @@
+
+from codecs import unicode_escape_decode
 from urllib.parse import urljoin
 import scrapy
 import logging
-from lxml.etree import XPathEvalError
-import os
 import re
 from scrapy.loader import ItemLoader
-
-
+from thefuzz import fuzz, process
+import unidecode
+import mysql.connector
 
 from ..items import ScrapebackendItem
 
@@ -23,25 +24,65 @@ class RestaurantSpider(scrapy.Spider):
 
         urls = [
             # 'https://www.tripadvisor.com/Restaurant_Review-g34127-d491231-Reviews-Celebration_Town_Tavern-Celebration_Orlando_Florida.html'
-            # 'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html',
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
             # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
-            'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'
+            # 'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'
 
         ]
         RestaurantSpider.count = 0
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.get_state_pg)
+            yield scrapy.Request(url=url, callback=self.parse_all_page)
         
 # ----------------------------------------------------------------------------------------------------
     # for testing only    
 
-        def test(self, response):
-            print('\n')
+    def test(self, response):
+        s1 = 'Arashi Yama Sushi & Hibachi'
+        # s1 = unidecode.unidecode(s1)
+        s2 = 'Arashi Yama sushi & hibachi lounge'
+        # s1 = ''.join(e for e in s1 if e.isalnum())
+        # s2= ''.join(e for e in s2 if e.isalnum())
+        print('s1:' + s1)        
+        print('s2:' + s2)        
+        print('partial ratio: ' + str(fuzz.partial_ratio(s1, s2)))
+        print('ratio: ' + str(fuzz.ratio(s1,s2)))
+        print('\n')
 
-        # filename = 'smthswrong.html'
-        # with open(filename, 'wb') as f:
-        #     f.write(response.body)
+        rest_name = "Harry's Seafood Bar and Grille"
+        rest_zipcode = 32601
+        city_name = "Gainesville"
+
+        connection = mysql.connector.connect(
+            host = 'localhost',
+            user = 'root',
+            passwd = 'scrapy123=',
+            database = 'restaurant',
+            use_unicode = True
+        )
+        curr = connection.cursor()
+        curr.execute(f"""
+            SELECT unique_id, name, address FROM restaurant.restaurant_info where city = "{city_name}" and zipcode = "{rest_zipcode}"
+        """)
+        records = curr.fetchall()
+        print("Total number of rows in table: ", curr.rowcount)
+        print('\nPrinting each row')
+        
+        all_name = []
+        for row in records:
+            all_name.append(row[1])
+
+        # theprocess = process.extract("Harry's Seafood Bar and Grille", all_name, limit= 1, scorer=fuzz.ratio)
+        # print(theprocess[0][0])
+        # index = all_name.index(theprocess[0][0])
+        # print(records[index][0])
+
+        theprocess = process.extract("fjsdklfjkls djk", all_name, limit=1, scorer=fuzz.ratio)
+        print(theprocess)
+
+    # filename = 'smthswrong.html'
+    # with open(filename, 'wb') as f:
+    #     f.write(response.body)
 
 
 # -----------------------------------------------------------------------------------------------------
@@ -109,7 +150,8 @@ class RestaurantSpider(scrapy.Spider):
         
     # input restaurant homepage and parse information
     def parse_page(self, response):
-        
+
+
         restaurant_name = response.xpath(
             '/html//h1[@data-test-target ="top-info-header"]/text()').get()
         restaurant_address = response.xpath(
@@ -146,31 +188,31 @@ class RestaurantSpider(scrapy.Spider):
 
         
         if restaurant_address != None:
-
             result_list = re.search(
                 fr'^(.+),\s{current_city}\s*\,*\s*\w*\,*\s*[A-Z]{{2}}\s*([0-9]{{5}})*-*([0-9]{{4}})*$',restaurant_address)
             # if result_list.groups()[1] == None:
+        
+        has_review = True
+        if five_star_count == None and five_star_count == four_star_count == three_star_count == two_star_count == one_star_count:
+            has_review = False
 
+        if restaurant_name != None and restaurant_address != None and result_list !=None and has_review:
+            current_item = ItemLoader(item=ScrapebackendItem(), response=response)
 
-        if restaurant_name != None and restaurant_address != None:
-            l = ItemLoader(item=ScrapebackendItem(), response=response)
+            current_item.replace_value('name', restaurant_name)
+            current_item.replace_value('city', current_city)
 
-            l.replace_value('name', restaurant_name)
-            l.replace_value('city', current_city)
+            current_item.replace_value('address', result_list.groups()[0])
+            current_item.replace_value('zipcode', result_list.groups()[1])
+            current_item.replace_value('zc_extension', result_list.groups()[2])
 
-            l.replace_value('five_star', five_star_count)
-            l.replace_value('four_star', four_star_count)
-            l.replace_value('three_star', three_star_count)
-            l.replace_value('two_star', two_star_count)
-            l.replace_value('one_star', one_star_count)
+            current_item.replace_value('five_star', five_star_count)
+            current_item.replace_value('four_star', four_star_count)
+            current_item.replace_value('three_star', three_star_count)
+            current_item.replace_value('two_star', two_star_count)
+            current_item.replace_value('one_star', one_star_count)
 
-            if result_list != None:
-                l.replace_value('address', result_list.groups()[0])
-                l.replace_value('zipcode', result_list.groups()[1])
-                l.replace_value('zc_extension', result_list.groups()[2])
-
-            return l.load_item()
-
+            return current_item.load_item()
 
     def __init__(self, *args, **kwargs):
         logger = logging.getLogger('scrapy.extensions.throttle')
