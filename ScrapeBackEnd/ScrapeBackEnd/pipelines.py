@@ -26,10 +26,6 @@ class ScrapebackendPipeline(object):
         
 
     def find_id_exact(self, item):
-        # print(item.name[0])
-        # print(item.address[0])
-        cur_name = item.name[0]
-        cur_address = item.address[0]
         self.curr.execute(
             f"""SELECT unique_id FROM restaurant.restaurant_info where name ="{item.name[0]}" and address = "{item.address[0]}" """)
         records = self.curr.fetchall()
@@ -100,4 +96,11 @@ class ScrapebackendPipeline(object):
         
         self.conn.commit()
         return item
-            
+
+class YelpPipeline(object):
+    """A pipeline for filtering out items which contain certain words in their
+	description"""
+
+    def process_item(self, item, spider):
+	    return item
+

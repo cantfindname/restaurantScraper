@@ -18,17 +18,17 @@ NEWSPIDER_MODULE = 'ScrapeBackEnd.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'ScrapeBackEnd (+http://www.yourdomain.com)'
 
-# Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# Obey robots.txt rules <--- NOOOOOO!
+ROBOTSTXT_OBEY = False
 
 DOWNLOAD_DELAY = 0
 DOWNLOAD_TIMEOUT = 15
 RANDOMIZE_DOWNLOAD_DELAY = True
 
-REACTOR_THREADPOOL_MAXSIZE = 1024
-CONCURRENT_REQUESTS = 1024
-CONCURRENT_REQUESTS_PER_DOMAIN = 1024
-CONCURRENT_REQUESTS_PER_IP = 1024
+REACTOR_THREADPOOL_MAXSIZE = 512
+CONCURRENT_REQUESTS = 512
+CONCURRENT_REQUESTS_PER_DOMAIN = 512
+CONCURRENT_REQUESTS_PER_IP = 512
 
 AUTOTHROTTLE_ENABLED = True
 AUTOTHROTTLE_START_DELAY = 1
@@ -40,9 +40,9 @@ RETRY_ENABLED = True
 RETRY_TIMES = 3
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 409, 410, 429]
 
-ITEM_PIPELINES = {
-   'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
-}
+# ITEM_PIPELINES = {
+#    'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
+# }
 
 LOG_LEVEL = 'INFO'
 

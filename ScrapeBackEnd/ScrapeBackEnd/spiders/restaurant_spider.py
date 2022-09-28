@@ -1,5 +1,4 @@
 
-from codecs import unicode_escape_decode
 from urllib.parse import urljoin
 import scrapy
 import logging
@@ -15,6 +14,11 @@ from ..items import ScrapebackendItem
 
 class RestaurantSpider(scrapy.Spider):
     name = "restaurant"
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'ScrapeBackEnd.pipelines.ScrapebackendPipeline' :300
+        }
+    }
 
     current_page = None
     base_url= 'https://www.tripadvisor.com'
@@ -24,7 +28,7 @@ class RestaurantSpider(scrapy.Spider):
 
         urls = [
             # 'https://www.tripadvisor.com/Restaurant_Review-g34127-d491231-Reviews-Celebration_Town_Tavern-Celebration_Orlando_Florida.html'
-            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            # 'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
             # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'
@@ -150,7 +154,6 @@ class RestaurantSpider(scrapy.Spider):
         
     # input restaurant homepage and parse information
     def parse_page(self, response):
-
 
         restaurant_name = response.xpath(
             '/html//h1[@data-test-target ="top-info-header"]/text()').get()
