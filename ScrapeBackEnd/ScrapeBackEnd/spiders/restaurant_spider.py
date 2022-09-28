@@ -28,7 +28,7 @@ class RestaurantSpider(scrapy.Spider):
 
         urls = [
             # 'https://www.tripadvisor.com/Restaurant_Review-g34127-d491231-Reviews-Celebration_Town_Tavern-Celebration_Orlando_Florida.html'
-            # 'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
+            'https://www.tripadvisor.com/Restaurants-g34242-Gainesville_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
             # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'

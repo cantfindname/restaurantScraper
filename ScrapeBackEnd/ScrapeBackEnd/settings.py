@@ -21,7 +21,7 @@ NEWSPIDER_MODULE = 'ScrapeBackEnd.spiders'
 # Obey robots.txt rules <--- NOOOOOO!
 ROBOTSTXT_OBEY = False
 
-DOWNLOAD_DELAY = 0
+DOWNLOAD_DELAY = 1
 DOWNLOAD_TIMEOUT = 15
 RANDOMIZE_DOWNLOAD_DELAY = True
 
@@ -37,14 +37,30 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 128
 AUTOTHROTTLE_DEBUG = True
 
 RETRY_ENABLED = True
-RETRY_TIMES = 3
-RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 409, 410, 429]
+RETRY_TIMES = 10
+# RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 401, 403, 404, 405, 406, 407, 408, 409, 410, 429]
+RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408]
+
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+#     'scrapy_proxies.RandomProxy': 100,
+#     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+# }
+# Proxy mode
+# 0 = Every requests have different proxy
+# 1 = Take only one proxy from the list and assign it to every requests
+# 2 = Put a custom proxy to use in the settings
+# If proxy mode is 2 uncomment this sentence :
+#CUSTOM_PROXY = "http://host1:port"
+
+
+
 
 # ITEM_PIPELINES = {
 #    'ScrapeBackEnd.pipelines.ScrapebackendPipeline': 300,
 # }
 
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'WARNING'
 
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
