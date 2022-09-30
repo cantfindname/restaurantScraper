@@ -8,6 +8,7 @@
 from itemadapter import ItemAdapter
 import mysql.connector
 
+
 class ScrapebackendPipeline(object):
 
     def __init__(self):
@@ -17,13 +18,12 @@ class ScrapebackendPipeline(object):
         # self.find_id()
         # self.find_id_exact()
 
-    def find_id(self,item):
+    def find_id(self, item):
         self.curr.execute(
             f"""
                 SELECT unique_id, name, address FROM restaurant.restaurant_info where city = "{item.city[0]}" and zipcode = "{item.zipcode[0]}"
             """)
         records = self.curr.fetchall()
-        
 
     def find_id_exact(self, item):
         self.curr.execute(
@@ -34,15 +34,13 @@ class ScrapebackendPipeline(object):
                 print(row[0])
         return records[0][0]
 
-
-
     def create_connection(self):
         self.conn = mysql.connector.connect(
-            host = 'localhost',
-            user = 'root',
-            passwd = 'scrapy123=',
-            database = 'restaurant',
-            use_unicode = True
+            host='localhost',
+            user='root',
+            passwd='scrapy123=',
+            database='restaurant',
+            use_unicode=True
         )
         self.curr = self.conn.cursor()
 
@@ -75,12 +73,12 @@ class ScrapebackendPipeline(object):
         self.curr.execute("""INSERT INTO restaurant_info 
         (name, address, city, zipcode, zc_extension) 
         VALUES (%s,%s,%s,%s,%s)""", (
-            item.name[0], 
+            item.name[0],
             item.address[0],
             item.city[0],
             item.zipcode[0],
             item.zc_extension[0]
-            ))
+        ))
         self.conn.commit()
 
         self.curr.execute("""INSERT INTO TA_info
@@ -93,14 +91,14 @@ class ScrapebackendPipeline(object):
             item.two_star[0],
             item.one_star[0]
         ))
-        
+
         self.conn.commit()
         return item
 
+
 class YelpPipeline(object):
     """A pipeline for filtering out items which contain certain words in their
-	description"""
+        description"""
 
     def process_item(self, item, spider):
-	    return item
-
+        return item

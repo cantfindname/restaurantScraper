@@ -10,11 +10,12 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+
 class YelpSpider(scrapy.Spider):
     name = "yelp"
     custom_settings = {
-        'ITEM_PIPELINES':{
-            'ScrapeBackEnd.pipelines.YelpPipeline' : 301
+        'ITEM_PIPELINES': {
+            'ScrapeBackEnd.pipelines.YelpPipeline': 301
         }
     }
 
@@ -37,42 +38,41 @@ class YelpSpider(scrapy.Spider):
         ]
         YelpSpider.count = 0
         for url in urls:
-            yield scrapy.Request(url = url, callback= self.parse_all_page)
+            yield scrapy.Request(url=url, callback=self.parse_all_page)
 
 # ----------------------------------------------------------------------------------------
 
     def test(self, response):
         # restaurant_name = response.xpath('/html//div[@data-testid = "photoHeader"]//h1[1]/text()').get()
         # print(restaurant_name)
-        
+
         restaurant_list = response.xpath(
             """/html//main[@id = "main-content"]//div[@class = " container__09f24__mpR8_ hoverable__09f24__wQ_on border-color--default__09f24__NPAKY"]
             //div[contains(@class, "arrange-unit")][2]//span[@data-font-weight = "bold"]/a[@href]/@href""").extract()
 
         for restaurant in restaurant_list:
             print(YelpSpider.base_url+restaurant)
-            yield scrapy.Request(url = YelpSpider.base_url+restaurant, callback= self.parse_all_page)
-            YelpSpider.count +=1
+            yield scrapy.Request(url=YelpSpider.base_url+restaurant, callback=self.parse_all_page)
+            YelpSpider.count += 1
 
         # filename = 'smthswrong.txt'
         # with open(filename, 'wb') as f:
         #     f.write(response.body)
-        
+
 
 # ----------------------------------------------------------------------------------------
 
+
     def parse_all_page(self, response):
 
-
-
-        current_city = 'Gainesville' # change later!
+        current_city = 'Gainesville'  # change later!
 
         # if YelpSpider.current_page == None:
         #     YelpSpider.current_page = response.request.url
-        
+
         # for restaurant in id_list:
         # print(restaurant)
-        yield scrapy.Request(url = response.request.url, callback=self.parse_page_list)
+        yield scrapy.Request(url=response.request.url, callback=self.parse_page_list)
 
         page_count = response.xpath(
             '/html//main[@id = "main-content"]//div[@role = "navigation"]//span[@class = " css-chan6m"]/text()').get()
@@ -82,17 +82,18 @@ class YelpSpider(scrapy.Spider):
         print(page_count)
 
         if page_count != None:
-            page_count = page_count.replace('1 of ','')
+            page_count = page_count.replace('1 of ', '')
             print(page_count)
             print(response.request.url)
 
-            for page_num in range(10,int(page_count)*10,10):   
+            for page_num in range(10, int(page_count)*10, 10):
                 print(page_num)
-                search_url = YelpSpider.base_url + f'/search?find_desc=Restaurants&find_loc={self.format_string(current_city)}%2C+{YelpSpider.current_state}&start={page_num}'
+                search_url = YelpSpider.base_url + \
+                    f'/search?find_desc=Restaurants&find_loc={self.format_string(current_city)}%2C+{YelpSpider.current_state}&start={page_num}'
                 # print(search_url)
                 # print(self.get_biz_id(search_url))
-                
-                yield scrapy.Request(url =search_url, callback = self.parse_page_list)
+
+                yield scrapy.Request(url=search_url, callback=self.parse_page_list)
 
     # def get_biz_url(self,response):
     #     print(response)
@@ -111,7 +112,6 @@ class YelpSpider(scrapy.Spider):
 
     #     return id_list
 
-
     # def get_biz_id(self,response):
     #     print('hi')
     #     data = json.loads(response.body.decode(response.encoding))
@@ -128,12 +128,10 @@ class YelpSpider(scrapy.Spider):
 
     #     return id_list
 
-
     def format_string(self, city_str):
-        city_str = city_str.replace(' ','+')
-        city_str = city_str.replace('\'','%27')
+        city_str = city_str.replace(' ', '+')
+        city_str = city_str.replace('\'', '%27')
         return city_str
-
 
     def parse_page_list(self, response):
 
@@ -143,14 +141,15 @@ class YelpSpider(scrapy.Spider):
 
         for restaurant in restaurant_list:
             print(YelpSpider.base_url+restaurant)
-            yield scrapy.Request(url = YelpSpider.base_url+restaurant, callback= self.parse_page)
-            YelpSpider.count +=1
-        
-        print('count: '+ str(YelpSpider.count))
+            yield scrapy.Request(url=YelpSpider.base_url+restaurant, callback=self.parse_page)
+            YelpSpider.count += 1
+
+        print('count: ' + str(YelpSpider.count))
 
     def parse_page(self, response):
         # print(response.request.url)
-        restaurant_name = response.xpath('/html//div[@data-testid = "photoHeader"]//h1[1]/text()').get()
+        restaurant_name = response.xpath(
+            '/html//div[@data-testid = "photoHeader"]//h1[1]/text()').get()
         if restaurant_name == None:
             print(response.request.url)
             print(response.body)
@@ -158,7 +157,6 @@ class YelpSpider(scrapy.Spider):
         else:
             print(unidecode.unidecode(restaurant_name))
         # print(restaurant_name)
-        
 
 
 # //span[@class = " css-chan6m"]/text(
