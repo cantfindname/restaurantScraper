@@ -23,6 +23,7 @@ class ScrapebackendPipeline(object):
             f"""
                 SELECT unique_id, name, address FROM restaurant.restaurant_info where city = "{item.city[0]}" and zipcode = "{item.zipcode[0]}"
             """)
+
         records = self.curr.fetchall()
 
     def find_id_exact(self, item):
@@ -99,6 +100,27 @@ class ScrapebackendPipeline(object):
 class YelpPipeline(object):
     """A pipeline for filtering out items which contain certain words in their
         description"""
+
+    def __init__(self):
+        self.create_connection()
+
+    def create_connection(self):
+        self.conn = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            passwd='scrapy123=',
+            database='restaurant',
+            use_unicode=True
+        )
+        self.curr = self.conn.cursor()
+
+    def create_yelp_table(self):
+        self.curr.execute("""DROP TABLE IF EXISTS yelp_info""")
+        self.curr.execute("""CREATE TABLE yelp_info(
+            unique_id INT,
+            
+            
+            )""")
 
     def process_item(self, item, spider):
         return item

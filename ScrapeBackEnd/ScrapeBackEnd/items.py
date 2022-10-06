@@ -24,3 +24,12 @@ class ScrapebackendItem:
     two_star: Optional[int] = field(default=0)
     one_star: Optional[int] = field(default=0)
     # pass
+
+
+@dataclass
+class YelpBackendItem:
+    name: str = field(default='none')
+    city: str = field(default='none')
+    address: Optional[str] = field(default='none')
+    rating: Optional[float] = field(default='-1')
+    rating_count: Optional[int] = field(default='0')
