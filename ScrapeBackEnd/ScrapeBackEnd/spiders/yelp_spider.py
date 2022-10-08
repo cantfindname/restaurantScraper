@@ -10,6 +10,8 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
+from ..items import YelpBackendItem
+
 
 class YelpSpider(scrapy.Spider):
     name = "yelp"
@@ -116,27 +118,29 @@ class YelpSpider(scrapy.Spider):
         if restaurant_name == None:
             print('ummmm, yelp being mean again')
             # self.parse_page
+
         else:
-            print(restaurant_name)
             print(unidecode.unidecode(restaurant_name))
 
-            rating_count = response.xpath(
-                '/html//div[@data-testid ="photoHeader"]//span[@data-font-weight= "semibold"]/text()').get()
-            rating_count = rating_count.replace(' reviews', '')
-
-            restaurant_tags = response.xpath(
-                '/html//div[@data-testid = "photoHeader"]//span[@class = " display--inline__09f24__c6N_k margin-r1__09f24__rN_ga border-color--default__09f24__NPAKY"][3]//a[@href]/text()'
-            ).extract()
-            tags = ', '.join(str(tag) for tag in restaurant_tags)
-
+            # get street address, city, zipcode
             restaurant_address = response.xpath(
                 '/html//address[@class]/p[@class][1]/a/span[@class]/text()').get()
             restaurant_cityZip = response.xpath(
                 '/html//address[@class]/p[@class][2]/span[@class]/text()').get()
-
             city = restaurant_cityZip.split(', ')[0]
-
             zipcode = restaurant_cityZip.split(', ')[1].split(' ')[1]
+
+            # get restaurant tags
+            restaurant_tags = response.xpath(
+                '/html//div[@data-testid = "photoHeader"]//span[@class = " display--inline__09f24__c6N_k margin-r1__09f24__rN_ga border-color--default__09f24__NPAKY"][3]//a[@href]/text()'
+            ).extract()
+            if restaurant_tags != None:
+                tags = ', '.join(str(tag) for tag in restaurant_tags)
+
+            # get total and separate rating counts
+            rating_count = response.xpath(
+                '/html//div[@data-testid ="photoHeader"]//span[@data-font-weight= "semibold"]/text()').get()
+            rating_count = rating_count.replace(' reviews', '')
 
             stars = response.xpath(
                 '/html//section[@aria-label= "Recommended Reviews"]//div[@data-testid = "review-summary"]//div[@data-testid = "review-summary-bar"]/div[2]/div/div/@style').extract()
@@ -144,7 +148,6 @@ class YelpSpider(scrapy.Spider):
             total_percent = 0
             separate_ratings = []
             for star in stars:
-                print(star)
                 star = star.replace('width:', '')
                 star = star.replace('%', '')
                 separate_ratings.insert(0, float(star))
@@ -158,6 +161,22 @@ class YelpSpider(scrapy.Spider):
             two_star_count = separate_ratings[1] * perPercent
             one_star_count = separate_ratings[0] * perPercent
 
+            first_review = response.xpath(
+                '/html//section[@aria-label = "Recommended Reviews"]//ul[@class = " undefined list__09f24__ynIEd"]/li//span[@lang = "en"]/text()').extract()
+            print(' '.join(unidecode.unidecode(each) for each in first_review))
+
+            second_review = response.xpath(
+                '/html//section[@aria-label = "Recommended Reviews"]//ul[@class = " undefined list__09f24__ynIEd"]/li[2]//span[@lang = "en"]/text()').extract()
+            print(' '.join(unidecode.unidecode(each)
+                  for each in second_review))
+
+            third_review = response.xpath(
+                '/html//section[@aria-label = "Recommended Reviews"]//ul[@class = " undefined list__09f24__ynIEd"]/li[3]//span[@lang = "en"]/text()').extract()
+            print(' '.join(unidecode.unidecode(each) for each in third_review))
+
+            # print(first_review)
+            # print(second_review)
+            # print(third_review)
             print(five_star_count)
             print(four_star_count)
             print(three_star_count)
@@ -172,7 +191,53 @@ class YelpSpider(scrapy.Spider):
             print(restaurant_tags)
             print(tags)
 
+            if restaurant_name != None and restaurant_address != None:
+                current_item = ItemLoader(
+                    item=YelpBackendItem(), response=response)
+
+                current_item.replace_value(
+                    'name', unidecode.unidecode(restaurant_name))
+
+                current_item.replace_value('address', restaurant_address)
+
+                current_item.replace_value(
+                    'city', restaurant_cityZip.split(', ')[0])
+
+                current_item.replace_value(
+                    'zipcode', restaurant_cityZip.split(', ')[1].split(' ')[1])
+
+                if restaurant_tags != None:
+                    current_item.replace_value('tags', tags)
+                current_item.replace_value('rating_count', rating_count)
+
+                if rating_count != None:
+                    current_item.replace_value(
+                        'five_star', separate_ratings[4] * perPercent)
+                    current_item.replace_value(
+                        'four_star', separate_ratings[3] * perPercent)
+                    current_item.replace_value(
+                        'three_star', separate_ratings[2] * perPercent)
+                    current_item.replace_value(
+                        'two_star', separate_ratings[1] * perPercent)
+                    current_item.replace_value(
+                        'one_star', separate_ratings[0] * perPercent)
+
+                if first_review != None:
+                    current_item.replace_value(
+                        'first_review', ' '.join(
+                            unidecode.unidecode(each) for each in first_review)
+                    )
+
+                if second_review != None:
+                    current_item.replace_value(
+                        'second_review', ' '.join(
+                            unidecode.unidecode(each) for each in second_review)
+                    )
+                if third_review != None:
+                    current_item.replace_value(
+                        'third_review', ' '.join(
+                            unidecode.unidecode(each) for each in third_review)
+                    )
+            return current_item.load_item()
+
         # print(restaurant_name)
-
-
-# //span[@class = " css-chan6m"]/text(

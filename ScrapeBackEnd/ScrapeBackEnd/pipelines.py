@@ -7,6 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 import mysql.connector
+import thefuzz
 
 
 class ScrapebackendPipeline(object):
@@ -98,11 +99,10 @@ class ScrapebackendPipeline(object):
 
 
 class YelpPipeline(object):
-    """A pipeline for filtering out items which contain certain words in their
-        description"""
 
     def __init__(self):
         self.create_connection()
+        self.create_yelp_table()
 
     def create_connection(self):
         self.conn = mysql.connector.connect(
@@ -118,9 +118,42 @@ class YelpPipeline(object):
         self.curr.execute("""DROP TABLE IF EXISTS yelp_info""")
         self.curr.execute("""CREATE TABLE yelp_info(
             unique_id INT,
-            
-            
+            name text,
+            address text, 
+            city text, 
+            zipcode int, 
+            tags text,
+            rating_count int,
+            five_star int, 
+            four_star int,
+            three_star int,
+            two_star int, 
+            one_star int,
+            first_review text,
+            second_review text,
+            third_review text
             )""")
 
     def process_item(self, item, spider):
+
+        self.curr.execute("""INSERT INTO yelp_info
+        (name, address, city, zipcode, tags, rating_count, five_star, four_star, three_star, 
+        two_star, one_star, first_review, second_review, third_review)
+        VALUE(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+            item.name[0],
+            item.address[0],
+            item.city[0],
+            item.zipcode[0],
+            item.tags[0],
+            item.rating_count[0],
+            item.five_star[0],
+            item.four_star[0],
+            item.three_star[0],
+            item.two_star[0],
+            item.one_star[0],
+            item.first_review[0],
+            item.second_review[0],
+            item.third_review[0]
+        ))
+        self.conn.commit()
         return item
