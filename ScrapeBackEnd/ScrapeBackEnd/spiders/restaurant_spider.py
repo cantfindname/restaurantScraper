@@ -31,6 +31,7 @@ class RestaurantSpider(scrapy.Spider):
             # 'https://www.tripadvisor.com/Restaurants-g34515-Orlando_Florida.html',
             # 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html'
             # 'https://www.tripadvisor.com/Restaurants-g28930-Florida.html'
+            # 'https://quotes.toscrape.com/page/1/'
 
         ]
         RestaurantSpider.count = 0
@@ -77,12 +78,15 @@ class RestaurantSpider(scrapy.Spider):
 
         # theprocess = process.extract("Harry's Seafood Bar and Grille", all_name, limit= 1, scorer=fuzz.ratio)
         # print(theprocess[0][0])
-        # index = all_name.index(theprocess[0][0])
-        # print(records[index][0])
 
         theprocess = process.extract(
-            "fjsdklfjkls djk", all_name, limit=1, scorer=fuzz.ratio)
-        print(theprocess)
+            "the top", all_name, limit=2, scorer=fuzz.partial_ratio)
+
+        index = all_name.index(theprocess[0][0])
+        print('this : ' + str(records[index][0]))
+
+        for each in theprocess:
+            print(each)
 
     # filename = 'smthswrong.html'
     # with open(filename, 'wb') as f:
@@ -90,7 +94,6 @@ class RestaurantSpider(scrapy.Spider):
 
 
 # -----------------------------------------------------------------------------------------------------
-
 
     def get_state_pg(self, response):
         city_list = response.xpath(
