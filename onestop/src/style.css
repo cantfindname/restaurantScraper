@@ -1,7 +1,6 @@
 
 * {
     box-sizing: border-box;
-
 }
 
 body {
@@ -27,7 +26,6 @@ nav {
     position: relative;
     display: flex;
     padding-left: 20px;
-  
 }
 
 
@@ -44,8 +42,6 @@ nav {
     padding: 10px;
     padding-left: 50px;
     border-radius: 15px;
-
-    
 }
 
 .searchBar::placeholder {
@@ -54,21 +50,20 @@ nav {
     font-weight: 300;
     font-size: 17px;
     display: flex;
-    
 }
 
 /* Main Content */
 
 .sort {
     display: flex;
+    justify-content: space-evenly;
     padding: 15px;
     background-color: #FAFAFA;
     margin: 10px 15vw;
     border-radius: 5px;
     font-family: 'Inter';
     font-size: 16px;
-    
-
+    align-items: center; 
 }
 
 .sort > button {
@@ -78,11 +73,9 @@ nav {
     margin-inline: 3%;
     /* padding: 15px; */
     border: none;
-    /* padding: 7px 10px; */
+    padding: 7px 10px;
     border-radius: 5px;
     background-color: #FAFAFA;
-
-    
 }
 
 .sort > button:hover {
@@ -93,8 +86,8 @@ nav {
 .sort > button:active {
     background-color: #a8a1a1;
     transition: 0.2s;
-
 }
+
 /* Footer */
 
 .footerList {
