@@ -1,8 +1,26 @@
-import React from "react"
+import React, { useEffect} from "react";
+import { useState } from "react";
 // import search from "../images/search.svg"
-import icon from "../images/icon.svg"
+import icon from "../images/icon.svg";
+import Axios from "axios";
 
-export default function navbar() {
+export default function Navbar() {
+
+    // const [resData, setResData] = useState([{}])
+    // useEffect (()=>{
+    //     fetch("http://localhost:3001/api/get").then(
+    //         response => response.json()
+    //     ).then(
+    //         data => {
+    //             setResData(data)
+    //         }
+    //     )
+    // }, [])
+    
+    const searchHandle =(event)=>{
+        console.warn(event.target.value);
+    }
+
     return (
         <div>
             <nav>
@@ -12,7 +30,8 @@ export default function navbar() {
                     <input
                     class = "searchBar"
                     type = "text" 
-                    placeholder = "Where to?"/>
+                    placeholder = "Where to?"
+                    onChange={searchHandle}/>
 
                 </div>
             </nav>

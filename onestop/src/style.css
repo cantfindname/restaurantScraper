@@ -88,6 +88,22 @@ nav {
     transition: 0.2s;
 }
 
+.restaurantList {
+ justify-content: center;
+}
+
+.resCard {
+    display:flex; 
+    padding: 70px;
+    margin: 15px 15vw;
+    border-radius: 5px;
+    background-color: #FAFAFA;
+}
+
+.resName {
+    font-size: 18pt;
+    font-weight: bold;
+}
 /* Footer */
 
 .footerList {
@@ -104,3 +120,4 @@ nav {
 .footerList > li {
     padding-inline: 10%;
 }
+
