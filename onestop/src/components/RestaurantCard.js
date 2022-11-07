@@ -1,15 +1,14 @@
 import React from "react"
 
-export default function Card(){
-
+export default function Card(props){
+    const restaurant = props.props
     return (
-        <div class = "resCard">
-            <div class = "resName">Embers Wood Grill</div>
-            <div class = "resRating">4/5</div>
-            <div class = "resRatingCount">123 ratings</div>
-            <div class = "resAddrerss">3545 SW 34th St</div>
+        <div className="resCard">
+            <div className="resName">{restaurant.name}</div>
+            <div className="resRating">4/5</div>
+            <div className="resRatingCount">123 ratings</div>
+            <div className="resAddrerss">{restaurant.address}</div>
         </div>
-)
-
-}
+            )
+        }
 

@@ -32,7 +32,7 @@ const pool = mysql.createPool({
             // })
             
 app.get('/api/get', (req, res)=>{            
-    let sql = 'select * from restaurant.restaurant_info where zipcode = 32601'
+    let sql = 'select * from restaurant.restaurant_info where zipcode = 32601 limit 0, 10'
     pool.query(sql, (err, queryRes)=>{
         res.json(queryRes);
     });
