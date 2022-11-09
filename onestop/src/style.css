@@ -98,12 +98,18 @@ nav {
     margin: 15px 15vw;
     border-radius: 5px;
     background-color: #FAFAFA;
+    flex-direction: column;
 }
 
 .resName {
     font-size: 18pt;
     font-weight: bold;
 }
+
+.resAddress {
+    font-size: 16pt;
+}
+
 /* Footer */
 
 .footerList {

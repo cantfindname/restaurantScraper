@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from "react"
 import RestaurantCard from "./RestaurantCard"
 
-export default function Main_content() {
+export default function MainContent(props) {
+
     const [resData, setResData] = useState(null)
 
     const fetchResData = () => {
@@ -13,6 +14,11 @@ export default function Main_content() {
     }
     useEffect(() => fetchResData(), [])
 
+    useEffect(() => {
+        // if props.searchedRestaurants == [] (or check .empty?)
+        // then you call fetchResData again
+        props.searchedRestaurants && setResData(props.searchedRestaurants)
+    },[props.searchedRestaurants])
 
     // useEffect (()=>{
     //     fetch('http://localhost:3001/api/get')

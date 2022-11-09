@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React, { useState} from 'react'
 import ReactDOM from 'react-dom'
 import Navbar from './components/Navbar.js'
 import MainContent from './components/MainContent.js'
@@ -13,11 +13,12 @@ import './style.css'
 
 
 export default function APP(){
+    const [searchedRestaurants, setSearchedRestaurants] = useState(null)
 
     return(
         <div>
-            <Navbar />
-            <MainContent />
+            <Navbar setSearchedRestaurants={setSearchedRestaurants} />
+            <MainContent searchedRestaurants={searchedRestaurants}/>
             <Footer />
         </div>
     )

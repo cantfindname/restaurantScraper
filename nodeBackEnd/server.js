@@ -2,6 +2,8 @@
 const mysql = require('mysql2');
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios = require('axios')
+
 require('dotenv').config();
 
 var app = express();
@@ -36,6 +38,18 @@ app.get('/api/get', (req, res)=>{
     pool.query(sql, (err, queryRes)=>{
         res.json(queryRes);
     });
+});
+
+app.get('/search', (req, res)=>{
+    // params[:keyword]
+    console.log(req.query)
+    let sql = 'select * from restaurant.restaurant_info where zipcode = 32601 limit 0, 2'
+    pool.query(sql, (err, searchRes)=>{
+        res.json(searchRes)
+    })
+    // console.log('hi');
+    // res.end();
+    // send back data here! json: { data: {...}}
 });
 
 
