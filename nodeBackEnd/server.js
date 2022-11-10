@@ -1,13 +1,13 @@
 
-const mysql = require('mysql2');
-const express = require('express');
-const bodyParser = require('body-parser');
+const mysql = require('mysql2')
+const express = require('express')
+const bodyParser = require('body-parser')
 const axios = require('axios')
 
-require('dotenv').config();
+require('dotenv').config()
 
-var app = express();
-app.use(bodyParser.json());
+var app = express()
+app.use(bodyParser.json())
 
 const pool = mysql.createPool({
     host : 'localhost',
@@ -42,8 +42,10 @@ app.get('/api/get', (req, res)=>{
 
 app.get('/search', (req, res)=>{
     // params[:keyword]
-    console.log(req.query)
-    let sql = 'select * from restaurant.restaurant_info where zipcode = 32601 limit 0, 2'
+    console.log(req.query['keyword'])
+    const searchKeyword = req.query['keyword']
+
+    let sql = `SELECT * FROM restaurant_info WHERE name SOUNDS LIKE "${searchKeyword}" limit 10;`
     pool.query(sql, (err, searchRes)=>{
         res.json(searchRes)
     })

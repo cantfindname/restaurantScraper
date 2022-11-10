@@ -56,7 +56,7 @@ export default function Navbar(props) {
                         {...register("keyword", { required: true })} 
                         />
                     
-                        <input type="submit" value ="Search"/>
+                        <input type="submit" value ="Search" className="searchButton"/>
                     </form>
 
                 </div>
