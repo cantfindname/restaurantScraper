@@ -21,14 +21,6 @@ class ScrapebackendPipeline(object):
         # self.find_id()
         # self.find_id_exact()
 
-    def find_id(self, item):
-        self.curr.execute(
-            f"""
-                SELECT unique_id, name, address FROM restaurant.restaurant_info where city = "{item.city[0]}" and zipcode = "{item.zipcode[0]}"
-            """)
-
-        records = self.curr.fetchall()
-
     def find_id_exact(self, item):
         self.curr.execute(
             f"""SELECT unique_id FROM restaurant.restaurant_info where name ="{item.name[0]}" and address = "{item.address[0]}" """)
@@ -120,20 +112,16 @@ class YelpPipeline(object):
         self.curr.execute("""DROP TABLE IF EXISTS yelp_info""")
         self.curr.execute("""CREATE TABLE yelp_info(
             unique_id INT,
-            name text,
-            address text,
-            city text,
-            zipcode int,
-            tags text,
-            rating_count int,
-            five_star int,
-            four_star int,
-            three_star int,
-            two_star int,
-            one_star int,
-            first_review text,
-            second_review text,
-            third_review text
+            yl_tags text,
+            yl_rating_count int,
+            yl_five_star int,
+            yl_four_star int,
+            yl_three_star int,
+            yl_two_star int,
+            yl_one_star int,
+            yl_first_review text,
+            yl_second_review text,
+            yl_third_review text
             )""")
 
     def find_id(self, item):
@@ -184,26 +172,13 @@ class YelpPipeline(object):
             unique_id = records[index][0]
             return unique_id
 
-    # def find_id_exact(self, item):
-    #     self.curr.execute(
-    #         f"""SELECT unique_id FROM restaurant.restaurant_info where name ="{item.name[0]}" and address = "{item.address[0]}" """)
-    #     records = self.curr.fetchall()
-    #     if len(records) > 1:
-    #         for row in records:
-    #             print(row[0])
-    #     return records[0][0]
-
     def process_item(self, item, spider):
 
         self.curr.execute("""INSERT INTO yelp_info
-        (unique_id, name, address, city, zipcode, tags, rating_count, five_star, four_star, three_star,
-        two_star, one_star, first_review, second_review, third_review)
-        VALUE(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+        (unique_id, yl_tags, yl_rating_count, yl_five_star, yl_four_star, yl_three_star,
+        yl_two_star, yl_one_star, yl_first_review, yl_second_review, yl_third_review)
+        VALUE(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
             self.find_id(item),
-            item.name[0],
-            item.address[0],
-            item.city[0],
-            item.zipcode[0],
             item.tags[0],
             item.rating_count[0],
             item.five_star[0],

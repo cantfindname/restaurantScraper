@@ -33,9 +33,16 @@ const pool = mysql.createPool({
             //     return res; 
             // })
             
-app.get('/api/get', (req, res)=>{            
-    let sql = 'select * from restaurant.restaurant_info where zipcode = 32601 limit 0, 10'
-    pool.query(sql, (err, queryRes)=>{
+            
+    app.get('/api/get', (req, res)=>{            
+        // let sql = 'select * from restaurant.restaurant_info where zipcode = 32601 limit 0, 10'
+        let sql = `select * from restaurant_info as info
+            inner join ta_info as ta
+            on info.unique_id = ta.unique_id 
+            inner join yelp_info as yelp
+            on info.unique_id = yelp.unique_id limit 10
+            `
+        pool.query(sql, (err, queryRes)=>{
         res.json(queryRes);
     });
 });

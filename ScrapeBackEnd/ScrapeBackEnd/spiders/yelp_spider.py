@@ -21,17 +21,17 @@ class YelpSpider(scrapy.Spider):
         }
     }
 
-    headers = {
-        'accept': '*/*',
-        'accept-encoding': 'gzip, deflate, br',
-        'accept-language': 'en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7',
-        'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-    }
+    # headers = {
+    #     'accept': '*/*',
+    #     'accept-encoding': 'gzip, deflate, br',
+    #     'accept-language': 'en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7',
+    #     'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
+    #     'sec-ch-ua-platform': '"Windows"',
+    #     'sec-fetch-dest': 'empty',
+    #     'sec-fetch-mode': 'cors',
+    #     'sec-fetch-site': 'same-origin',
+    #     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+    # }
 
     # current_page = None
     current_state = 'FL'
@@ -53,12 +53,13 @@ class YelpSpider(scrapy.Spider):
             # 'https://www.yelp.com/biz/paris-banh-mi-gainesville-gainesville?osq=Restaurants'
             # 'https://www.yelp.com/biz/sebastian-alexander-gainesville-2?osq=Restaurants'
             # 'https://www.yelp.com/biz/the-burger-den-eustis'
+            # 'https://www.yelp.com/biz/taco-s-352-gainesville?osq=Restaurants'
 
         ]
 
         YelpSpider.count = 0
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse_all_page, headers=self.headers)
+            yield scrapy.Request(url=url, callback=self.parse_all_page)
 
 # ----------------------------------------------------------------------------------------
 
@@ -66,27 +67,44 @@ class YelpSpider(scrapy.Spider):
         # restaurant_name = response.xpath('/html//div[@data-testid = "photoHeader"]//h1[1]/text()').get()
         # print(restaurant_name)
 
-        restaurant_list = response.xpath(
-            """/html//main[@id = "main-content"]//div[@class = " container__09f24__mpR8_ hoverable__09f24__wQ_on border-color--default__09f24__NPAKY"]
-            //div[contains(@class, "arrange-unit")][2]//span[@data-font-weight = "bold"]/a[@href]/@href""").extract()
+        rating_count = response.xpath(
+            '/html//div[@data-testid = "review-summary"]//div[@class = " rating-text__09f24__VDRkR padding-t0-5__09f24__lDQoQ border-color--default__09f24__NPAKY"]/p/text()').get()
+        print(rating_count)
 
-        for restaurant in restaurant_list:
-            print(YelpSpider.base_url+restaurant)
-            yield scrapy.Request(url=YelpSpider.base_url+restaurant, callback=self.parse_all_page)
-            YelpSpider.count += 1
+        if rating_count != None:
+            rating_count = rating_count.replace(' reviews', '')
+            rating_count = rating_count.replace(' review', '')
+            print(rating_count)
 
-        # filename = 'smthswrong.txt'
-        # with open(filename, 'wb') as f:
-        #     f.write(response.body)
+            stars = response.xpath(
+                '/html//section[@aria-label= "Recommended Reviews"]//div[@data-testid = "review-summary"]//div[@data-testid = "review-summary-bar"]/div[2]/div/div/@style').extract()
+            print(stars)
+
+            total_percent = 0
+            separate_ratings = []
+            for star in stars:
+                star = star.replace('width:', '')
+                star = star.replace('%', '')
+                separate_ratings.insert(0, float(star))
+                total_percent += float(star)
+                print(star)
+
+            perPercent = int(rating_count) / total_percent
+            print(perPercent)
+
+        filename = 'smthswrong.txt'
+        with open(filename, 'wb') as f:
+            f.write(response.body)
 
 
 # ----------------------------------------------------------------------------------------
+
 
     def parse_all_page(self, response):
 
         current_city = 'Gainesville'  # change later!
 
-        yield scrapy.Request(url=response.request.url, callback=self.parse_page_list, headers=self.headers)
+        yield scrapy.Request(url=response.request.url, callback=self.parse_page_list)
 
         page_count = response.xpath(
             '/html//main[@id = "main-content"]//div[@role = "navigation"]//span[@class = " css-chan6m"]/text()').get()
@@ -103,7 +121,7 @@ class YelpSpider(scrapy.Spider):
                 search_url = YelpSpider.base_url + \
                     f'/search?find_desc=Restaurants&find_loc={self.format_string(current_city)}%2C+{YelpSpider.current_state}&start={page_num}'
 
-                yield scrapy.Request(url=search_url, callback=self.parse_page_list, headers=self.headers)
+                yield scrapy.Request(url=search_url, callback=self.parse_page_list)
 
     def format_string(self, city_str):
         city_str = city_str.replace(' ', '+')
@@ -156,7 +174,8 @@ class YelpSpider(scrapy.Spider):
 
             # get total and separate rating counts
             rating_count = response.xpath(
-                '/html//div[@data-testid ="photoHeader"]//div[@class= " arrange-unit__09f24__rqHTg arrange-unit-fill__09f24__CUubG border-color--default__09f24__NPAKY nowrap__09f24__lBkC2"]/span[@class = " css-1fdy0l5"]/text()').get()
+                '/html//div[@data-testid = "review-summary"]//div[@class = " rating-text__09f24__VDRkR padding-t0-5__09f24__lDQoQ border-color--default__09f24__NPAKY"]/p/text()').get()
+
             # print(rating_count)
             if rating_count != None:
                 rating_count = rating_count.replace(' reviews', '')
@@ -192,23 +211,6 @@ class YelpSpider(scrapy.Spider):
             third_review = response.xpath(
                 '/html//section[@aria-label = "Recommended Reviews"]//ul[@class = " undefined list__09f24__ynIEd"]/li[3]//span[@lang = "en"]/text()').extract()
             # print(' '.join(unidecode.unidecode(each) for each in third_review))
-
-            # print(first_review)
-            # print(second_review)
-            # print(third_review)
-            # print(five_star_count)
-            # print(four_star_count)
-            # print(three_star_count)
-            # print(two_star_count)
-            # print(one_star_count)
-
-            # print(zipcode)
-            # print(city)
-            # print(restaurant_cityZip)
-            # print(restaurant_address)
-            # print(rating_count)
-            # print(restaurant_tags)
-            # print(tags)
 
             if restaurant_name != None and restaurant_address != None and restaurant_cityZip != None:
                 current_item = ItemLoader(

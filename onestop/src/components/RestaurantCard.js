@@ -9,6 +9,6 @@ export default function Card(props){
             <div className="resRatingCount">123 ratings</div>
             <div className="resAddrerss">{restaurant.address}</div>
         </div>
-            )
-        }
+    )
+}
 
