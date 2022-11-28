@@ -52,7 +52,7 @@ export default function Navbar(props) {
                         class = "searchBar"
                         name = "keyword"
                         type = "text" 
-                        placeholder = "Where to?"
+                        placeholder = "Which restaurant?"
                         {...register("keyword", { required: true })} 
                         />
                     
